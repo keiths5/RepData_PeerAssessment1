@@ -1,9 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
@@ -11,7 +6,8 @@ output:
 1. Read the unzipped CSV file into a dataframe, this file has a header and is comma seperated
 1. make sure that the "date" field is formatted as a Date
 1. Remove NA as a preprocessing step
-```{r loading, echo=TRUE}
+
+```r
 unzip("activity.zip", overwrite=TRUE, exdir=".")
 activityDF <- read.csv("activity.csv", header=TRUE, sep=",")
 activityDF$date <- as.Date(activityDF$date)
@@ -25,7 +21,8 @@ activityDF_noNA <- na.omit(activityDF)
 1. With the calculated total steps per day, calculate the median
 1. Using ggplot2 library, create a histogram of the total steps per day
 1. Output mean and median of stepsPerDayTotal
-```{r totalSteps, echo=TRUE}
+
+```r
 library(plyr)
 
 stepsPerDayTotal <- ddply(activityDF_noNA, c("date"), summarise, TotalStepsPerDay = sum(steps))
@@ -35,18 +32,36 @@ stepsPerDayMedian <- median(stepsPerDayTotal$TotalStepsPerDay)
 library(ggplot2)
 ggplot(stepsPerDayTotal, aes(x=TotalStepsPerDay)) + 
         geom_histogram(binwidth=500, colour="black", fill="white")
-stepsPerDayMean
-stepsPerDayMedian
+```
 
+![](PA1_template_files/figure-html/totalSteps-1.png) 
+
+```r
+stepsPerDayMean
+```
+
+```
+## [1] 10766.19
+```
+
+```r
+stepsPerDayMedian
+```
+
+```
+## [1] 10765
 ```
 
 ## What is the average daily activity pattern?
 1. Calculate the average steps per day using the dataset with NA removed
 1. Create the required plot 
-```{r avgDailyActivity, echo=TRUE}
+
+```r
 stepsPerDayAvg <- ddply(activityDF_noNA, c("date"), summarise, AvgStepsPerDay = mean(steps))
 ggplot(stepsPerDayAvg, aes(x=date, y=AvgStepsPerDay)) + geom_line()
 ```
+
+![](PA1_template_files/figure-html/avgDailyActivity-1.png) 
 
 
 ## Imputing missing values
@@ -60,8 +75,16 @@ ggplot(stepsPerDayAvg, aes(x=date, y=AvgStepsPerDay)) + geom_line()
 ## Impact of imputing
 The impact of imputing with the dataset average, at least on the historgram, only made the average even larger.  Because of the impute method used, the mean and median didn't really change much.
 
-```{r ImputingMissingValues, echo=TRUE}
+
+```r
 sum(is.na(activityDF$steps))
+```
+
+```
+## [1] 2304
+```
+
+```r
 imputeActivityDF <- activityDF
 imputeActivityDF$steps[is.na(imputeActivityDF$steps)] = mean(imputeActivityDF$steps, na.rm=TRUE)
 imputeStepsPerDayTotal <- ddply(imputeActivityDF, c("date"), summarise, TotalStepsPerDay = sum(steps))
@@ -69,8 +92,24 @@ imputeStepsPerDayMean <- mean(imputeStepsPerDayTotal$TotalStepsPerDay)
 imputeStepsPerDayMedian <- median(imputeStepsPerDayTotal$TotalStepsPerDay)
 ggplot(imputeStepsPerDayTotal, aes(x=TotalStepsPerDay)) + 
         geom_histogram(binwidth=500, colour="black", fill="white")
+```
+
+![](PA1_template_files/figure-html/ImputingMissingValues-1.png) 
+
+```r
 imputeStepsPerDayMean
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 imputeStepsPerDayMedian
+```
+
+```
+## [1] 10766.19
 ```
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -78,9 +117,12 @@ imputeStepsPerDayMedian
 1. Create column with the a weekdays column
 1. Make the isWeekend column easy to plot with a True/False
 1. Create the plot
-```{r}
+
+```r
 stepsPerDayAvg_noNA <- ddply(activityDF, c("date"), summarise, AvgStepsPerDay = mean(steps))
 stepsPerDayAvg$weekDays <- weekdays(stepsPerDayAvg$date, abbreviate=TRUE)
 stepsPerDayAvg$isWeekend <- with(stepsPerDayAvg, ifelse(weekDays %in% c('Sat', 'Sun'), 'Weekend', 'Weekday'))
 ggplot(stepsPerDayAvg, aes(x=date, y=AvgStepsPerDay)) + geom_line() + facet_grid(isWeekend ~ .)
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-1-1.png) 
